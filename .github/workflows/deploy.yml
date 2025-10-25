@@ -1,0 +1,44 @@
+name: Deploy OS.js
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Discover packages
+      run: npm run package:discover
+      
+    - name: Build project
+      run: npm run build
+      
+    # 注意：在GitHub Actions中，我们不能直接使用npm run serve并保持服务运行
+    # 以下是替代方案，可以将构建后的内容部署到GitHub Pages
+    
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v1
+      
+    - name: Upload build
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: './dist'
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v1
+      
+    # 输出部署URL
+    - name: Show deployment URL
+      run: echo "部署成功！访问地址：${{ steps.deployment.outputs.page_url }}"
